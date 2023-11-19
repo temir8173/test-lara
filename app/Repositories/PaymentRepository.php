@@ -24,6 +24,7 @@ class PaymentRepository implements IPaymentRepository
             $id = DB::table('payments')->insertGetId([
                 'gateway' => $entity->gateway,
                 'payment_id' => $entity->paymentId,
+                'user_id' => 1,
                 'status' => $entity->status,
                 'amount' => $entity->amount,
                 'amount_paid' => $entity->amountPaid,
@@ -35,7 +36,7 @@ class PaymentRepository implements IPaymentRepository
         return $id;
     }
 
-    public function checkIfExists(int $paymentId): ?int
+    private function checkIfExists(int $paymentId): ?int
     {
         $payment = DB::table('payments')
             ->select('id')
@@ -43,5 +44,11 @@ class PaymentRepository implements IPaymentRepository
             ->first();
 
         return $payment?->id;
+    }
+
+    public function getTodayPaymentsCount(string $gateway): int
+    {
+        // Todo: "SELECT count(id) FROM payments WHERE gateway = %gateway% AND created_at %today%"
+        return rand(30, 120);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Entities\Payments\PaymentStatusEntity;
+use App\Services\Payments\Gateways\FirstPaymentGateway;
+use App\Services\Payments\Gateways\SecondPaymentGateway;
 use App\Services\Payments\IPaymentService;
 use App\Services\Payments\PaymentService;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +23,7 @@ class PaymentController extends Controller
         ];
 
         $entity = new PaymentStatusEntity(
-            gateway: PaymentService::FIRST_PAYMENT,
+            gateway: FirstPaymentGateway::PAYMENT_NAME,
             paymentId: $request->json()->getInt('payment_id'),
             status: $request->json()->get('status'),
             amount: $request->json()->getInt('amount'),
@@ -46,7 +48,7 @@ class PaymentController extends Controller
         ];
 
         $entity = new PaymentStatusEntity(
-            gateway: PaymentService::SECOND_PAYMENT,
+            gateway: SecondPaymentGateway::PAYMENT_NAME,
             paymentId: $request->post('invoice'),
             status: $request->post('status'),
             amount: $request->post('amount'),

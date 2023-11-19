@@ -3,9 +3,17 @@
 namespace App\Services\Payments\Gateways;
 
 use App\Entities\Payments\PaymentStatusEntity;
+use App\Repositories\Interfaces\IPaymentRepository;
 
 class FirstPaymentGateway implements IPaymentGateway
 {
+    public const PAYMENT_NAME = 'first-gateway';
+    private const LIMIT_PER_DAY = 50;
+
+    public function __construct(
+        private readonly IPaymentRepository $paymentRepository
+    ) {}
+
     public function checkPaymentStatusSign(PaymentStatusEntity $entity): bool
     {
         $originalRequest = [
@@ -25,6 +33,7 @@ class FirstPaymentGateway implements IPaymentGateway
 
     public function checkLimit(): bool
     {
-        return true;
+        $todayPaymentsCount = $this->paymentRepository->getTodayPaymentsCount(self::PAYMENT_NAME);
+        return $todayPaymentsCount < self::LIMIT_PER_DAY;
     }
 }

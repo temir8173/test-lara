@@ -7,29 +7,35 @@ use App\Repositories\Interfaces\IPaymentRepository;
 use App\Services\Payments\Gateways\FirstPaymentGateway;
 use App\Services\Payments\Gateways\IPaymentGateway;
 use App\Services\Payments\Gateways\SecondPaymentGateway;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\Container;
 
 class PaymentService implements IPaymentService
 {
-    public const FIRST_PAYMENT = 'first-payment';
-    public const SECOND_PAYMENT = 'second-payment';
-
     private IPaymentGateway $gateway;
 
     public function __construct(
-        private readonly IPaymentRepository $repository
+        private readonly IPaymentRepository $repository,
+        private readonly Container $container,
     ) {}
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function setGateway(string $gateway): PaymentService
     {
         $gatewayClass = match ($gateway) {
-            self::FIRST_PAYMENT => FirstPaymentGateway::class,
-            self::SECOND_PAYMENT => SecondPaymentGateway::class,
+            FirstPaymentGateway::PAYMENT_NAME => FirstPaymentGateway::class,
+            SecondPaymentGateway::PAYMENT_NAME => SecondPaymentGateway::class,
         };
 
-        $this->gateway = new $gatewayClass();
+        $this->gateway = $this->container->make($gatewayClass);
         return $this;
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function changeStatus(PaymentStatusEntity $entity): bool
     {
         $this->setGateway($entity->gateway);
